@@ -2,38 +2,11 @@ version: '2'
 
 services:
 
-  biap-bap-protocol:
-    image: navdeep710/ondc-protocol-layer-server:v3
-    container_name: bap-protocol
-    depends_on:
-      - mongo
-    environment:
-      ENV: dev
-      DATABASE_URL: mongodb://mongo:27017
-    expose:
-      - 9002
-    ports:
-      - 9002:9002
-
   mongo:
     image: mongo
     restart: always
     ports:
       - 27017:27017
-
-  biap-bap-client:
-    image: navdeep710/ondc-client-layer-server:v3
-    container_name: bap-client
-    depends_on:
-      - biap-bap-protocol
-    environment:
-      ENV: dev
-      PROTOCOL_HOST: ${PROTOCOL_HOST}
-      DATABASE_URL: mongodb://mongo:27017
-    ports:
-      - 9001:9001
-    expose:
-      - 9001
 
   mmi-client:
     image: navdeep710/ondc-ancillary-services:v2
@@ -127,12 +100,14 @@ services:
       - mongo
 
   py-ondc-protocol:
-    image: navdeep710/ondc-python-protocol-layer:v2
+    build:
+      context: py-ondc-protocol/webserver
     container_name: py-ondc-protocol
     environment:
       ENV: prod
       MONGO_DATABASE_HOST: mongo
       BAP_URL: ${BAP_URL}
+      CLIENT_WEBHOOK_ENDPOINT: ${CLIENT_WEBHOOK_ENDPOINT}
     ports:
       - 5555:5555
     expose:
